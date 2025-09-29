@@ -1,0 +1,45 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int batteryPin = A0;
+const int buzzerPin = 8;
+
+float batteryVoltage = 0.0;
+float SOC = 0.0;
+
+void setup() {
+  pinMode(buzzerPin, OUTPUT);
+  lcd.begin(16, 2);
+  lcd.print("EV SOC Monitor");
+  delay(2000);
+}
+
+void loop() {
+  int sensorValue = analogRead(batteryPin);
+  
+  // Convert ADC value to battery voltage (assuming divider scaling to 0-25V)
+  batteryVoltage = sensorValue * (25.0 / 1023.0);
+  
+  // Estimate SOC as percentage (0V=0%, 25V=100%)
+  SOC = (batteryVoltage / 25.0) * 100.0;
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Voltage: ");
+  lcd.print(batteryVoltage, 1);
+  lcd.print("V");
+  
+  lcd.setCursor(0, 1);
+  lcd.print("SOC: ");
+  lcd.print(SOC, 1);
+  lcd.print("%");
+
+  if (SOC < 20.0) {
+    digitalWrite(buzzerPin, HIGH);
+  } else {
+    digitalWrite(buzzerPin, LOW);
+  }
+
+  delay(1000);
+}
